@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WWB Catalog Search | Main</title>
+</head>
+<body>
+<form action='upload' method='post' enctype="multipart/form-data">
+{% csrf_token %}
+<table>
+	<tr>
+<!-- 		<td><label for='customer'>Select a customer:</label></td>
+		<td><select name='customer'>
+			<option value='116'>116z (Princeton)</option>
+			<option value='2528'>2528z (Getty)</option>
+			<option value='1225'>1225A (Oberlin)</option>
+		</select></td> -->
+	</tr>
+	<tr>
+		{{ form.as_table }}
+		<!-- <td><label for='upload'>Select a .csv file to upload:</label></td>
+		<td><input type="file" name="upload" accept=".csv"></td> -->
+	</tr>
+	<tr>
+		<td></td>
+		<td><input type="submit" name="submit" value="Submit"></td>
+	</tr>
+</table>
+	
+</form>
+</body>
+</html>

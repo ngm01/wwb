@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{%load static%}
+	<title>WWB Catalog Search | Results</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="{%static 'search/scripts.js' %}"></script>
+
+
+</head>
+<body>
+<h1>Results:</h1>
+<br>
+<h3>TODO:</h3>
+<ul>
+	<li><del>Need to make the table sortable.</del></li>
+	<li>Need to make search results exportable.
+	<ul>
+		<li>Now that we can create excel files from our data:</li>
+		<li>Need to save this files somewhere (media? static?) on the server</li>
+		<li>SERVE those files to the user (as a GET request? It needs to work like clicking a link.)</li>
+		<li></li>
+	</ul>
+	</li>
+	<li>Add up-down glyphicons to the table headers (i.e. bootstrap the css.)</li>
+	<li>Need to perform each search individually, so that if the script breaks for some reason (connection timeout, server thinks it's being spammed and rejects requests, etc) some of the results are recoverable (Here heed Tim's advice and move the search function to its own module.)
+	</li>
+	<li>Do we want to have the page render "in real time", ie keep updating as more search results come in?</li>
+</ul>
+<table id='results_table'>
+<tr>
+	<th class='1'>Item #</th>
+	<th class='2'>Title</th>
+	<th class='3'>ISBN</th>
+	<th class='4'>Search Results</th>
+</tr>
+{%for book in results%}
+<tr>
+	<td class='1'>{{book.item_number}}</td>
+	<td class='2'>{{book.title}}</td>
+	<td class='3'>ISBN {{book.isbn}}</td>
+	<td class='4'><a href='{{urls.0}}{{book.isbn}}{{urls.1}}' target="_blank">{{book.match}}</a></td>
+</tr>
+{%endfor%}
+</table>
+<br>
+<form action='export' method='post'>
+	{% csrf_token %}
+	<label for='filetype'>Export search results as:</label>
+	<select name='filetype'>
+		<option value='excel'>Excel 2010 (.xlsx)</option>
+		<option value='csv'>Comma Seperated Value (.csv)</option>
+	</select>
+	<input type="submit" name="submit" value="Export">
+</form>
+<a href="/">Home</a>
+</body>
+</html>
