@@ -23,7 +23,7 @@ def upload(request):
 				for chunk in uploaded.chunks():
 					f.write(chunk)
 			f.close()
-			return redirect('search/search_results')
+			return redirect('/search/search_results')
 		else:
 			return redirect('/')
 
@@ -42,6 +42,7 @@ def search_results(request):
 
 
 	"""
+	# Do I need a results variable or could I just store it all in session?
 	results = Customer.objects.get(cust_number=request.session['customer']).searchCatalog('uploads/wwbsearch.csv')
 	request.session['results'] = results
 
@@ -53,10 +54,20 @@ def search_results(request):
 	return render(request, 'search/results.html', context)
 
 
-def export(request):
+def create_file(request):
 	if request.POST['filetype'] == 'excel':
-		exportToExcel(request.session['results'], request.session['customer'])
+		 request.session['filename'] = exportToExcel(request.session['results'], request.session['customer'])
+		 return redirect('/search/export')
 	elif request.POST['filetype'] == 'csv':
 		print "Coming soon..."
+		return HttpResponse(status=204)
+	print "We are in create file"
 
-	return HttpResponse(status=204)
+def export(request):
+	# This is obviously excessive -- I don't fully understand the url routing system, so I've created some
+	# sort of bad route that requires this weird path to find my static files.
+	return redirect('../../../static/' + request.session['filename'])
+
+def logout(request):
+	request.session.flush()
+	return redirect('/')

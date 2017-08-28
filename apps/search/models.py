@@ -21,6 +21,8 @@ class Customer(models.Model):
 	def searchCatalog(self, searchList):
 		data = []
 		#startTime = time.strftime("%m/%d/%Y %I:%M:%S %p", time.localtime())
+		# TODO:
+		#	- Add something that removes any blank lines from the end of the file
 		with open(searchList, 'r') as f:
 			reader = csv.reader(f)
 			for row in reader:

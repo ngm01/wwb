@@ -14,18 +14,13 @@
 <h3>TODO:</h3>
 <ul>
 	<li><del>Need to make the table sortable.</del></li>
-	<li>Need to make search results exportable.
-	<ul>
-		<li>Now that we can create excel files from our data:</li>
-		<li>Need to save this files somewhere (media? static?) on the server</li>
-		<li>SERVE those files to the user (as a GET request? It needs to work like clicking a link.)</li>
-		<li></li>
-	</ul>
-	</li>
-	<li>Add up-down glyphicons to the table headers (i.e. bootstrap the css.)</li>
+	<li><del>Need to make search results exportable.</del></li>
+	<li>Fix the routing/directoy issues for file save/serve. Dedicated folder on server, in search app directory, for files.</li>
+	<li>Supply a default filename but allow user to enter a custom filename for the download.</li>
+	<li>Use bootstrap for CSS. Add up/down glyphicon to table headings.</li>
 	<li>Need to perform each search individually, so that if the script breaks for some reason (connection timeout, server thinks it's being spammed and rejects requests, etc) some of the results are recoverable (Here heed Tim's advice and move the search function to its own module.)
 	</li>
-	<li>Do we want to have the page render "in real time", ie keep updating as more search results come in?</li>
+	<li>Large searches may take some time. So we may want to have an intermediary "counting" page or message window (use bootstrap to create this) which will say, A) that the search is in progress and searching title number x of y B) that will allow you to cancel the search at any point, but will return any results gathered before search was cancelled.</li>
 </ul>
 <table id='results_table'>
 <tr>
@@ -44,7 +39,7 @@
 {%endfor%}
 </table>
 <br>
-<form action='export' method='post'>
+<form action='/search/create_file' method='post'>
 	{% csrf_token %}
 	<label for='filetype'>Export search results as:</label>
 	<select name='filetype'>
