@@ -3,7 +3,7 @@ from wwb.settings import MEDIA_ROOT, MEDIA_URL
 from django.conf import settings
 from models import Files, Customer, User
 from .forms import UploadFileForm
-from logics import exportToExcel
+from logics import exportToExcel, searchCatalog
 
 
 def index(request):
@@ -16,7 +16,7 @@ def index(request):
 def upload(request):
 	if request.method == 'POST':
 		form = UploadFileForm(request.POST, request.FILES)
-		request.session['customer'] = request.POST['customer']
+		request.session['customer_number'] = request.POST['customer_number']
 		if form.is_valid():
 			uploaded = request.FILES['file']
 			with open('uploads/wwbsearch.csv', 'wb+') as f:
@@ -27,9 +27,6 @@ def upload(request):
 		else:
 			return redirect('/')
 
-		
-
-def search_results(request):
 
 	"""
 
@@ -42,13 +39,24 @@ def search_results(request):
 
 
 	"""
-	# Do I need a results variable or could I just store it all in session?
-	results = Customer.objects.get(cust_number=request.session['customer']).searchCatalog('uploads/wwbsearch.csv')
+	# Do I need a results variable or could I just store it all in session?	
+
+def search_results(request):
+
+
+	customer = Customer.objects.get(cust_number=request.session['customer_number'])
+	results = searchCatalog(customer, 'uploads/wwbsearch.csv')
 	request.session['results'] = results
+	matches = 0
+	for result in results:
+		if result['match'] == "Possible Match":
+			matches += 1
+
 
 	context = {
-	'results' : results,
-	'urls' :[Customer.objects.get(cust_number=request.session['customer']).url_begin, Customer.objects.get(cust_number=request.session['customer']).url_end]
+			'results' : results,
+			'urls' :[customer.url_begin, customer.url_end],
+			'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches]
 	}
 
 	return render(request, 'search/results.html', context)
@@ -56,15 +64,14 @@ def search_results(request):
 
 def create_file(request):
 	if request.POST['filetype'] == 'excel':
-		 request.session['filename'] = exportToExcel(request.session['results'], request.session['customer'])
+		 request.session['filename'] = exportToExcel(request.session['results'], Customer.objects.get(cust_number=request.session['customer_number']))
 		 return redirect('/search/export')
 	elif request.POST['filetype'] == 'csv':
 		print "Coming soon..."
 		return HttpResponse(status=204)
-	print "We are in create file"
 
 def export(request):
-	# This is obviously excessive -- I don't fully understand the url routing system, so I've created some
+	# This route is obviously excessive -- I don't fully understand the url routing system, so I've created some
 	# sort of bad route that requires this weird path to find my static files.
 	return redirect('../../../static/' + request.session['filename'])
 

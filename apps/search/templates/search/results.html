@@ -5,49 +5,63 @@
 	<title>WWB Catalog Search | Results</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="{%static 'search/scripts.js' %}"></script>
-
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-responsive.min.css">
 
 </head>
-<body>
-<h1>Results:</h1>
-<br>
-<h3>TODO:</h3>
-<ul>
-	<li><del>Need to make the table sortable.</del></li>
-	<li><del>Need to make search results exportable.</del></li>
-	<li>Fix the routing/directoy issues for file save/serve. Dedicated folder on server, in search app directory, for files.</li>
-	<li>Supply a default filename but allow user to enter a custom filename for the download.</li>
-	<li>Use bootstrap for CSS. Add up/down glyphicon to table headings.</li>
-	<li>Need to perform each search individually, so that if the script breaks for some reason (connection timeout, server thinks it's being spammed and rejects requests, etc) some of the results are recoverable (Here heed Tim's advice and move the search function to its own module.)
-	</li>
-	<li>Large searches may take some time. So we may want to have an intermediary "counting" page or message window (use bootstrap to create this) which will say, A) that the search is in progress and searching title number x of y B) that will allow you to cancel the search at any point, but will return any results gathered before search was cancelled.</li>
-</ul>
-<table id='results_table'>
-<tr>
-	<th class='1'>Item #</th>
-	<th class='2'>Title</th>
-	<th class='3'>ISBN</th>
-	<th class='4'>Search Results</th>
-</tr>
-{%for book in results%}
-<tr>
-	<td class='1'>{{book.item_number}}</td>
-	<td class='2'>{{book.title}}</td>
-	<td class='3'>ISBN {{book.isbn}}</td>
-	<td class='4'><a href='{{urls.0}}{{book.isbn}}{{urls.1}}' target="_blank">{{book.match}}</a></td>
-</tr>
-{%endfor%}
-</table>
-<br>
-<form action='/search/create_file' method='post'>
-	{% csrf_token %}
-	<label for='filetype'>Export search results as:</label>
-	<select name='filetype'>
-		<option value='excel'>Excel 2010 (.xlsx)</option>
-		<option value='csv'>Comma Seperated Value (.csv)</option>
-	</select>
-	<input type="submit" name="submit" value="Export">
-</form>
-<a href="/">Home</a>
+<body style="padding: 70px 0px">
+
+	<nav class='navbar navbar-default navbar-fixed-top'>
+		<div class='container'>
+			<div class='navbar-header'>
+				<a class="navbar-brand" href="#"><img src="{% static 'search/wwblogo1.jpg' %}" alt="Worldwide Books logo" width="27px"></a>
+			</div>
+			<div class="collapse navbar-collapse" id="navbar">
+				<ul class="nav navbar-nav">
+					<li><a href="/">New Search</a></li>
+					<li><a href="logout">Logout</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container">
+		<div class="page-header">
+		<h1>Results:</h1>
+		<ul>
+			<li>Customer Searched: {{search_data.0}} - {{search_data.1}}</li>
+			<li>Number of titles searched: {{search_data.2}}</li>
+			<li>Possible matches:  {{search_data.3}}</li>
+		</ul>
+		</div>
+
+		<table id='results_table' class='well table'>
+		<tr>
+			<th class='1'><span class="glyphicon glyphicon-sort" aria-hidden="true"></span> Item #</th>
+			<th class='2'><span class="glyphicon glyphicon-sort" aria-hidden="true"></span> Title</th>
+			<th class='3'><span class="glyphicon glyphicon-sort" aria-hidden="true"></span> ISBN</th>
+			<th class='4'><span class="glyphicon glyphicon-sort" aria-hidden="true"></span> Search Results</th>
+		</tr>
+		{%for book in results%}
+		<tr>
+			<td class='1'>{{book.item_number}}</td>
+			<td class='2'>{{book.title}}</td>
+			<td class='3'>ISBN {{book.isbn}}</td>
+			<td class='4'><a href='{{urls.0}}{{book.isbn}}{{urls.1}}' target="_blank">{{book.match}}</a></td>
+		</tr>
+		{%endfor%}
+		</table>
+
+
+		<form action='/search/create_file' method='post'>
+			{% csrf_token %}
+			<label for='filetype'>Export search results as:</label>
+			<select name='filetype'>
+				<option value='excel'>Excel 2010 (.xlsx)</option>
+				<option value='csv'>Comma Seperated Value (.csv)</option>
+			</select>
+			<input type="submit" name="submit" value="Export">
+		</form>
+	</div>
 </body>
 </html>
