@@ -18,6 +18,14 @@
 			margin-left: 65px;
 			margin-bottom: 5px;
 		}
+
+		.modal{
+			position: absolute;
+			top: 250px;
+			left: 500px;
+			width: 300px;
+			height: 200px;
+		}
 	</style>
 
 </head>
@@ -26,11 +34,12 @@
 	<nav class='navbar navbar-default navbar-fixed-top'>
 		<div class='container'>
 			<div class='navbar-header'>
-				<a class="navbar-brand" href="#page-header"><img src="{% static 'search/wwblogo1.jpg' %}" alt="Worldwide Books logo" width="27px"></a>
+				<a class="navbar-brand" href="#top"><img src="{% static 'search/wwblogo1.jpg' %}" alt="Worldwide Books logo" width="27px"></a>
 			</div>
 			<div class="collapse navbar-collapse" id="navbar">
 				<ul class="nav navbar-nav">
 					<li><a id="newSearchToggle" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">New Search <span style="position: relative; top: 3px" class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+					<li><a href="#">Help</a></li>
 					<li><a href="logout">Logout</a></li>
 				</ul>
 				<form class='navbar-form navbar-right' action='/search/create_file' method='post'>
@@ -54,7 +63,7 @@
 						<label style="margin-bottom: 2px">{{ field.label }}</label> 
 						 <div class="form-control">{{ field }}</div>
 					{%endfor%}
-						<button type="submit" class='btn btn-default' name="submit">Search</button>
+						<button id="searchSubmit" type="submit" class='btn btn-default' name="submit" data-toggle="modal" data-target="#loading" data-backdrop="static">Search</button>
 				</div>
 			</form>
 		</div>
@@ -90,5 +99,15 @@
 		</table>
 
 	</div>
+
+	<div class="modal fade" id="loading" tabindex="-1" role="dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<p>Searching...</p>
+				<a class="btn btn-warning" href="search_results" role="button">Cancel</a>
+			</div>
+		</div>
+	</div>
+
 </body>
 </html>

@@ -62,5 +62,6 @@ def searchCatalog(customer, searchList):
 			book['match'] = "No Match"
 		else:
 			book['match'] = "Possible Match"
+		count += 1
 
 	return data
