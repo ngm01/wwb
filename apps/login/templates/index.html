@@ -1,27 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>WWB Catalog Search | Login</title>
+	{%load static%}
+	<title>Catalog Search | Sign In</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-responsive.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/signin.css">
+	<link rel="shortcut icon" type="image/png" href="{%static '/favicon.ico'%}">
+	<style type="text/css">
+		#wwb-main{
+		width: 505px;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		margin-top: 80px;
+		border-radius: 5px;
+		background-color: #eee;
+		}
+		form{
+			margin: 10px;
+			width: 205px;
+			height: auto;
+			padding: 10px;
+			border-radius: 5px;
+			background-color: #C5B36D;
+			height: 205px;
+		}
+
+		button{
+			margin: 8px 0px;
+		}
+
+		img{
+			margin-top: 10px;
+			margin-right: 20px;
+		}
+
+	</style>
 </head>
 <body>
-<h1>Login</h1>
-<form action='login' method='post'>
-	{% csrf_token %}
-	<table>
-	<td><label for='user_name'>Username:</label></td>
-	<td><input type="text" name="user_name"></td>
-	</tr>
-	<tr>
-	<tr>
-	<td><label for='password'>Password:</label></td>
-	<td><input type="password" name="password"></td>
-	</tr>
-	<tr>
-	<td><input type="submit" name="login" value='Login'></td>
-	</tr>
-	</table>
-</form>
-
+<div class="container" id="wwb-main">
+	<img src="{%static '/wwblogo1.jpg'%}" alt="Worldwide Books logo" width="205px" height="205px">
+	<form action='login' method='post' class="form-signin">
+		{% csrf_token %}
+		<h1 class="form-signin-heading">Sign In</h1>
+		<label for='user_name' class="sr-only">Username:</label>
+		<input type="text" name="user_name" id="inputUsername" class="form-control" placeholder="Username">
+		<label for='password' class="sr-only">Password:</label>
+		<input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password">
+		<button type="submit" name="login" class="btn btn-lg btn-primary btn-block">Sign In</button>
+	</form>
+</div>
 
 {% if messages %}
 <div id='messages'>

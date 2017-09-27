@@ -23,30 +23,27 @@ def upload(request):
 				for chunk in uploaded.chunks():
 					f.write(chunk)
 			f.close()
-			return redirect('/search/search_results')
+			return redirect('/search/execute_search')
 		else:
 			return redirect('/')
 
 
-	"""
-
-	Will need a lot of error handling. Plenty can go wrong.
-	Now that we're actually at the phase where we're scraping the customer's catalog, all the error handling will be done
-	"under the hood" - no flash messages, etc. If we encounter any errors, that will be reported in the search results.
-
-	Need to use try/except for this...want script to be able to recover from something unexpected and keep going. If some ISBN
-	won't take, move on to the next one.
-
-
-	"""
-	# Do I need a results variable or could I just store it all in session?	
-
-def search_results(request):
-
-
+def execute_search(request):
 	customer = Customer.objects.get(cust_number=request.session['customer_number'])
 	results = searchCatalog(customer, 'uploads/wwbsearch.csv')
+	# Up too this point we haven't actually left the "New Search" page. 
+	# No new page has been rendered.
+	# So set this up to re-render the index page while the search is running,
+	# and then redirect to search/search_results when complete.
+	# We'll need to break the search functions down into different functions.
+
 	request.session['results'] = results
+	return redirect("/search/search_results")
+
+def search_results(request):
+	form = UploadFileForm()
+	customer = Customer.objects.get(cust_number=request.session['customer_number'])
+	results = request.session['results']
 	matches = 0
 	for result in results:
 		if result['match'] == "Possible Match":
@@ -54,6 +51,7 @@ def search_results(request):
 
 
 	context = {
+			'form': form,
 			'results' : results,
 			'urls' :[customer.url_begin, customer.url_end],
 			'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches]

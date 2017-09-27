@@ -1,4 +1,5 @@
 $(document).ready(function(){
+
 	$('th').click(function(){
 		var column = $(this).attr('class')
 		var table = document.getElementById('results_table')
@@ -12,7 +13,7 @@ $(document).ready(function(){
 				var shouldSwitch = false;
 				var this_cell = rows[i].getElementsByClassName(column)[0];
 				var next_cell = rows[i + 1].getElementsByClassName(column)[0];
-				console.log(this_cell.textContent)
+				// console.log(this_cell.textContent)
 				if (dir == 'asc'){
 					if (this_cell.textContent.toLowerCase() > next_cell.textContent.toLowerCase()){
 						shouldSwitch = true;
