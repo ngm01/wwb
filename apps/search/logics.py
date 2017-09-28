@@ -55,13 +55,19 @@ def searchCatalog(customer, searchList):
 		url = customer.url_begin + book['isbn'] + customer.url_end
 		urlReq = requests.get(url)
 		soup = BeautifulSoup(urlReq.text, 'html.parser')
-		exec('soup_parse = customer.element')
+		#exec('soup_parse = customer.element')
 		elem_list = customer.element.split(',')
 		parse_element = soup.find(elem_list[0], {elem_list[1]:elem_list[2]})
-		if customer.keywords in parse_element.text:
-			book['match'] = "No Match"
+		if customer.catalog_type == "B":
+			if customer.keywords in parse_element.text:
+				book['match'] = "No Match"
+			else:
+				book['match'] = "Possible Match"
 		else:
-			book['match'] = "Possible Match"
+			if parse_element != None:
+				book['match'] = "No Match"
+			else:
+				book['match'] = "Possible Match"
 		count += 1
 
 	return data
