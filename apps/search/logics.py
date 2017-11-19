@@ -1,5 +1,5 @@
 import openpyxl
-import csv, requests, time
+import requests, time
 from bs4 import BeautifulSoup
 from datetime import datetime
 
@@ -31,43 +31,24 @@ def exportToExcel(data, customer):
 	#	* save file somewhere in the static directory
 	#	* access this file so it gets downloaded to user's computer (use get request? It should function like a link...)
 
-def searchCatalog(customer, searchList):
-	
-	data = []
+def searchCatalog(customer, book):
 
 	#startTime = time.strftime("%m/%d/%Y %I:%M:%S %p", time.localtime())
-
-	with open(searchList, 'r') as f:
-		reader = csv.reader(f)
-		for row in reader:
-			if row[0] != '':
-				data.append({'item_number': row[0],
-					'title': row[1],
-					'isbn': row[9],
-					'match': ''})
-
-	del data[0]
-	num_titles = len(data)
-	count = 1
-	for book in data:
-		print "Checking", book['item_number'], count, "of", num_titles
-		book['isbn'] = book['isbn'].replace("ISBN ", "")
-		url = customer.url_begin + book['isbn'] + customer.url_end
-		urlReq = requests.get(url)
-		soup = BeautifulSoup(urlReq.text, 'html.parser')
-		#exec('soup_parse = customer.element')
-		elem_list = customer.element.split(',')
-		parse_element = soup.find(elem_list[0], {elem_list[1]:elem_list[2]})
-		if customer.catalog_type == "B":
-			if customer.keywords in parse_element.text:
-				book['match'] = "No Match"
-			else:
-				book['match'] = "Possible Match"
+	book['isbn'] = book['isbn'].replace("ISBN ", "")
+	url = customer.url_begin + book['isbn'] + customer.url_end
+	urlReq = requests.get(url)
+	soup = BeautifulSoup(urlReq.text, 'html.parser')
+	elem_list = customer.element.split(',')
+	parse_element = soup.find(elem_list[0], {elem_list[1]:elem_list[2]})
+	if customer.catalog_type == "B":
+		if customer.keywords in parse_element.text:
+			book['match'] = "No Match"
 		else:
-			if parse_element != None:
-				book['match'] = "No Match"
-			else:
-				book['match'] = "Possible Match"
-		count += 1
+			book['match'] = "Possible Match"
+	else:
+		if parse_element != None:
+			book['match'] = "No Match"
+		else:
+			book['match'] = "Possible Match"
 
-	return data
+	return book

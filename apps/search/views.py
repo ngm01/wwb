@@ -4,61 +4,80 @@ from django.conf import settings
 from models import Files, Customer, User
 from .forms import UploadFileForm
 from logics import exportToExcel, searchCatalog
+import csv, magic, io
 
 
 def index(request):
 	form = UploadFileForm()
-	context = {'form': form,
-				'media_root': MEDIA_ROOT}
+	# Checks whether there is a customer number saved in session -
+	# this functions as a check whether a search has been executed or not.
+	if 'customer_number' not in request.session:
+		context = {'form': form,
+					'media_root': MEDIA_ROOT}
 
-	return render(request, 'search/index.html', context)
+		return render(request, 'search/index.html', context)
+	
+	else:
+		customer = Customer.objects.get(cust_number=request.session['customer_number'])
+		
+		data = []
+		request.session['count'] = 0;
+
+		# problems begin here without file type validation of user input...
+		# upload is written to 'wwbsearch.csv' in the 'uploads' directory
+		# this happens in the upload() function below.
+		# That is where we need to do validation.
+		with open('uploads/wwbsearch.csv', 'r') as f:
+			reader = csv.reader(f)
+			for row in reader:
+				if row[0] != '':
+					data.append({'item_number': row[0],
+						'title': row[1],
+						'isbn': row[9],
+						'match': ''})
+
+		del data[0]
+		request.session['numberTitles'] = len(data)
+		for book in data:
+			book = searchCatalog(customer, book)
+			request.session['count'] += 1
+
+		#refactor 'results' and 'data' into a single variable
+		results = data
+		matches = 0
+		for result in results:
+			if result['match'] == "Possible Match":
+				matches += 1
+
+		#is session the best way to store these results?
+		request.session['results'] = results
+		context = {
+				'form': form,
+				'results' : results,
+				'urls' :[customer.url_begin, customer.url_end],
+				'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches]
+		}
+
+		return render(request, 'search/results.html', context)
 
 def upload(request):
 	if request.method == 'POST':
 		form = UploadFileForm(request.POST, request.FILES)
-		request.session['customer_number'] = request.POST['customer_number']
 		if form.is_valid():
-			uploaded = request.FILES['file']
-			with open('uploads/wwbsearch.csv', 'wb+') as f:
-				for chunk in uploaded.chunks():
-					f.write(chunk)
-			f.close()
-			return redirect('/search/execute_search')
-		else:
-			return redirect('/')
-
-
-def execute_search(request):
-	customer = Customer.objects.get(cust_number=request.session['customer_number'])
-	results = searchCatalog(customer, 'uploads/wwbsearch.csv')
-	# Up too this point we haven't actually left the "New Search" page. 
-	# No new page has been rendered.
-	# So set this up to re-render the index page while the search is running,
-	# and then redirect to search/search_results when complete.
-	# We'll need to break the search functions down into different functions.
-
-	request.session['results'] = results
-	return redirect("/search/search_results")
-
-def search_results(request):
-	form = UploadFileForm()
-	customer = Customer.objects.get(cust_number=request.session['customer_number'])
-	results = request.session['results']
-	matches = 0
-	for result in results:
-		if result['match'] == "Possible Match":
-			matches += 1
-
-
-	context = {
-			'form': form,
-			'results' : results,
-			'urls' :[customer.url_begin, customer.url_end],
-			'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches]
-	}
-
-	return render(request, 'search/results.html', context)
-
+			#get file from request
+			uploadedFile = request.FILES['file']
+			#create magic type checker
+			typeChecker = magic.from_buffer(uploadedFile.read())
+			print typeChecker
+			if not 'ASCII text' in typeChecker:
+				print "invalid file type"
+			else:
+				request.session['customer_number'] = request.POST['customer_number']
+				with open('uploads/wwbsearch.csv', 'wb+') as f:
+					for chunk in uploadedFile.chunks():
+						f.write(chunk)
+				f.close()
+	return redirect('/')
 
 def create_file(request):
 	if request.POST['filetype'] == 'excel':

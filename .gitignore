@@ -1,1 +1,6 @@
 .csv
+/vEnv
+.sqlite3
+time_testing.py
+./vscode
+troubleshooting.txt
