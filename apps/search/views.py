@@ -4,24 +4,24 @@ from django.conf import settings
 from models import Files, Customer, User
 from .forms import UploadFileForm
 from logics import exportToExcel, searchCatalog
-import csv, magic, io
+import csv, magic
 
 
-def index(request):
+def index(req):
 	form = UploadFileForm()
 	# Checks whether there is a customer number saved in session -
 	# this functions as a check whether a search has been executed or not.
-	if 'customer_number' not in request.session:
+	if 'customer_number' not in req.session:
 		context = {'form': form,
 					'media_root': MEDIA_ROOT}
 
-		return render(request, 'search/index.html', context)
+		return render(req, 'search/index.html', context)
 	
 	else:
-		customer = Customer.objects.get(cust_number=request.session['customer_number'])
+		customer = Customer.objects.get(cust_number=req.session['customer_number'])
 		
 		data = []
-		request.session['count'] = 0;
+		req.session['count'] = 0;
 
 		# problems begin here without file type validation of user input...
 		# upload is written to 'wwbsearch.csv' in the 'uploads' directory
@@ -37,10 +37,10 @@ def index(request):
 						'match': ''})
 
 		del data[0]
-		request.session['numberTitles'] = len(data)
+		req.session['numberTitles'] = len(data)
 		for book in data:
 			book = searchCatalog(customer, book)
-			request.session['count'] += 1
+			req.session['count'] += 1
 
 		#refactor 'results' and 'data' into a single variable
 		results = data
@@ -50,7 +50,7 @@ def index(request):
 				matches += 1
 
 		#is session the best way to store these results?
-		request.session['results'] = results
+		req.session['results'] = results
 		context = {
 				'form': form,
 				'results' : results,
@@ -58,40 +58,49 @@ def index(request):
 				'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches]
 		}
 
-		return render(request, 'search/results.html', context)
+		return render(req, 'search/results.html', context)
 
-def upload(request):
-	if request.method == 'POST':
-		form = UploadFileForm(request.POST, request.FILES)
+def upload(req):
+	if req.method == 'POST':
+		form = UploadFileForm(req.POST, req.FILES)
 		if form.is_valid():
-			#get file from request
-			uploadedFile = request.FILES['file']
-			#create magic type checker
-			typeChecker = magic.from_buffer(uploadedFile.read())
-			print typeChecker
-			if not 'ASCII text' in typeChecker:
-				print "invalid file type"
+			#get file from req
+			print "Form is valid..."
+			uploadedFile = req.FILES['file']
+			print "File is uploaded..."
+			# first check file extension: if it's not .csv, immediately throw error
+			if not str(uploadedFile).lower().endswith(".csv"):
+				print "Invalid file extension."
 			else:
-				request.session['customer_number'] = request.POST['customer_number']
-				with open('uploads/wwbsearch.csv', 'wb+') as f:
-					for chunk in uploadedFile.chunks():
-						f.write(chunk)
-				f.close()
+				# THEN, if file extension is .csv, run the magic typechecker
+				# just to make sure that it's really a csv.
+				print "File extension valid..."
+				typeChecker = magic.from_buffer(uploadedFile.read())
+				print typeChecker
+				if not 'ASCII text' in typeChecker:
+					print "Invalid file type."
+				else:
+					print "File type valid..."
+					req.session['customer_number'] = req.POST['customer_number']
+					with open('uploads/wwbsearch.csv', 'wb+') as f:
+						for chunk in uploadedFile.chunks():
+							f.write(chunk)
+					f.close()
 	return redirect('/')
 
-def create_file(request):
-	if request.POST['filetype'] == 'excel':
-		 request.session['filename'] = exportToExcel(request.session['results'], Customer.objects.get(cust_number=request.session['customer_number']))
+def create_file(req):
+	if req.POST['filetype'] == 'excel':
+		 req.session['filename'] = exportToExcel(req.session['results'], Customer.objects.get(cust_number=req.session['customer_number']))
 		 return redirect('/search/export')
-	elif request.POST['filetype'] == 'csv':
+	elif req.POST['filetype'] == 'csv':
 		print "Coming soon..."
 		return HttpResponse(status=204)
 
-def export(request):
-	# This route is obviously excessive -- I don't fully understand the url routing system, so I've created some
-	# sort of bad route that requires this weird path to find my static files.
-	return redirect('../../../static/' + request.session['filename'])
+def export(req):
+	# This route is obviously excessive -- I don't fully understand the routing system, so I've created some
+	# sort of bad route that requires this weird path to find my static files...
+	return redirect('../../../static/' + req.session['filename'])
 
-def logout(request):
-	request.session.flush()
+def logout(req):
+	req.session.flush()
 	return redirect('/')

@@ -1,6 +1,7 @@
 .csv
 /vEnv
-.sqlite3
+db.sqlite3
 time_testing.py
 ./vscode
 troubleshooting.txt
+vEnvActivation.txt
