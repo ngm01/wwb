@@ -26,6 +26,12 @@
 			width: 300px;
 			height: 200px;
 		}
+
+		.alert{
+			width: 400px;
+			position: absolute;
+			left: 450px;
+		}
 	</style>
 
 </head>
@@ -69,7 +75,16 @@
 		</div>
 	</nav>
 	
-
+	{% if validation == 'invalid' %}
+	<div class="alert alert-warning alert-dismissable show" id="error" tabindex="0" role="alert">
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+				<p>Error reading file. Please upload a .csv file downloaded from the
+					<a href="http://www.worldwide-artbooks.com/wwb_multiple_isbn_search.php" target="_blank"> Worldwide Books website.</a>
+				</p>
+	</div>
+	{% endif %}
 
 	<div class="container">
 		<div class="page-header">
@@ -99,12 +114,10 @@
 		</table>
 
 	</div>
-
 	<div class="modal fade" id="loading" tabindex="-1" role="dialog">
 		<div class="modal-content">
 			<div class="modal-body">
-				<p>Searching...</p>
-				<p>{{request.session.count}} {{request.session.numberTitles}}</p>
+					<p>Searching...</p>
 				<a class="btn btn-warning" href="/" role="button">Cancel</a>
 			</div>
 		</div>

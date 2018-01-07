@@ -9,11 +9,22 @@ import csv, magic
 
 def index(req):
 	form = UploadFileForm()
-	# Checks whether there is a customer number saved in session -
-	# this functions as a check whether a search has been executed or not.
+	# validation refers to file upload validation. This session variable
+	# is set in the "upload" route below.
+	# This doesn't work. (Of course not.) Damn.
+	try:
+		print req.session['validation']
+	except KeyError:
+		req.session['validation'] = ""
+
+	# Checks whether there is a customer number saved in session.
+	# This functions as a check whether a search has been executed or not.
+	# Buggy.
 	if 'customer_number' not in req.session:
 		context = {'form': form,
-					'media_root': MEDIA_ROOT}
+					'media_root': MEDIA_ROOT,
+					'validation': req.session['validation']}
+		print req.session['validation']
 
 		return render(req, 'search/index.html', context)
 	
@@ -51,11 +62,13 @@ def index(req):
 
 		#is session the best way to store these results?
 		req.session['results'] = results
+		print req.session['validation']
 		context = {
-				'form': form,
-				'results' : results,
-				'urls' :[customer.url_begin, customer.url_end],
-				'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches]
+			'form': form,
+			'results' : results,
+			'urls' :[customer.url_begin, customer.url_end],
+			'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches],
+			'validation': req.session['validation']
 		}
 
 		return render(req, 'search/results.html', context)
@@ -71,17 +84,20 @@ def upload(req):
 			# first check file extension: if it's not .csv, immediately throw error
 			if not str(uploadedFile).lower().endswith(".csv"):
 				print "Invalid file extension."
+				req.session['validation'] = "invalid"
 			else:
 				# THEN, if file extension is .csv, run the magic typechecker
 				# just to make sure that it's really a csv.
 				print "File extension valid..."
 				typeChecker = magic.from_buffer(uploadedFile.read())
 				print typeChecker
-				if not 'ASCII text' in typeChecker:
+				if not 'ASCII text' or 'ISO 8859 text' in typeChecker:
 					print "Invalid file type."
+					req.session['validation'] = "invalid"
 				else:
 					print "File type valid..."
 					req.session['customer_number'] = req.POST['customer_number']
+					req.session['validation'] = "valid"
 					with open('uploads/wwbsearch.csv', 'wb+') as f:
 						for chunk in uploadedFile.chunks():
 							f.write(chunk)
