@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-responsive.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/signin.css">
-	<link rel="shortcut icon" type="image/png" href="{%static '/favicon.ico'%}">
+	<link rel="shortcut icon" type="image/png" href="{%static 'login/favicon.ico'%}">
 	<style type="text/css">
 		#wwb-main{
 		width: 505px;
@@ -40,7 +40,7 @@
 </head>
 <body>
 <div class="container" id="wwb-main">
-	<img src="{%static '/wwblogo1.jpg'%}" alt="Worldwide Books logo" width="205px" height="205px">
+	<img src="{%static 'login/wwblogo1.jpg'%}" alt="Worldwide Books logo" width="205px" height="205px">
 	<form action='login' method='post' class="form-signin">
 		{% csrf_token %}
 		<h1 class="form-signin-heading">Sign In</h1>

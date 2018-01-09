@@ -113,10 +113,11 @@ def create_file(req):
 		return HttpResponse(status=204)
 
 def export(req):
-	# This route is obviously excessive -- I don't fully understand the routing system, so I've created some
-	# sort of bad route that requires this weird path to find my static files...
-	return redirect('../../../static/' + req.session['filename'])
+	print "Do we make it here?"
+	return redirect('/static/search/downloads/' + req.session['filename'])
 
 def logout(req):
+	# TODO:
+	# Delete all .xlsx files from 'static/search/downloads'
 	req.session.flush()
 	return redirect('/')

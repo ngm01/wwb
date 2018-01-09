@@ -24,12 +24,8 @@ def exportToExcel(data, customer):
 	search_date = datetime.strftime(datetime.now(), "%m%d%Y")
 	filename = str(customer.cust_number) + "search_results" + search_date + '.xlsx'
 
-	wb.save("static/" + filename)
+	wb.save("apps/search/static/search/downloads/" + filename)
 	return filename
-
-	# TODO:
-	#	* save file somewhere in the static directory
-	#	* access this file so it gets downloaded to user's computer (use get request? It should function like a link...)
 
 def searchCatalog(customer, book):
 
