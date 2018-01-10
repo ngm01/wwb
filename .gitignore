@@ -1,6 +1,4 @@
-.csv
 /vEnv
-db.sqlite3
 time_testing.py
 ./vscode
 troubleshooting.txt
