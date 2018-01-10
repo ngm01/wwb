@@ -77,17 +77,13 @@ def upload(req):
 	if req.method == 'POST':
 		form = UploadFileForm(req.POST, req.FILES)
 		if form.is_valid():
-			#get file from req
 			print "Form is valid..."
 			uploadedFile = req.FILES['file']
 			print "File is uploaded..."
-			# first check file extension: if it's not .csv, immediately throw error
 			if not str(uploadedFile).lower().endswith(".csv"):
 				print "Invalid file extension."
 				req.session['validation'] = "invalid"
 			else:
-				# THEN, if file extension is .csv, run the magic typechecker
-				# just to make sure that it's really a csv.
 				print "File extension valid..."
 				typeChecker = magic.from_buffer(uploadedFile.read())
 				print typeChecker
