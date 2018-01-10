@@ -19,11 +19,11 @@ ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 def location(f):
     return os.path.join(ROOT_DIR, f)
 
-uploads = os.path.join(BASE_DIR, 'uploads')
+files = os.path.join(BASE_DIR, 'files')
 
-MEDIA_URL = '/uploads/'
+MEDIA_URL = '/files/'
 
-MEDIA_ROOT = location(uploads)
+MEDIA_ROOT = location(files)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/

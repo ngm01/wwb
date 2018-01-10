@@ -23,8 +23,7 @@ def exportToExcel(data, customer):
 
 	search_date = datetime.strftime(datetime.now(), "%m%d%Y")
 	filename = str(customer.cust_number) + "search_results" + search_date + '.xlsx'
-
-	wb.save("apps/search/static/search/downloads/" + filename)
+	wb.save("files/" + filename)
 	return filename
 
 def searchCatalog(customer, book):

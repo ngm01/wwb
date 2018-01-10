@@ -4,7 +4,7 @@ from django.conf import settings
 from models import Files, Customer, User
 from .forms import UploadFileForm
 from logics import exportToExcel, searchCatalog
-import csv, magic
+import csv, magic, os
 
 
 def index(req):
@@ -38,7 +38,7 @@ def index(req):
 		# upload is written to 'wwbsearch.csv' in the 'uploads' directory
 		# this happens in the upload() function below.
 		# That is where we need to do validation.
-		with open('uploads/wwbsearch.csv', 'r') as f:
+		with open('files/wwbsearch.csv', 'r') as f:
 			reader = csv.reader(f)
 			for row in reader:
 				if row[0] != '':
@@ -98,7 +98,7 @@ def upload(req):
 					print "File type valid..."
 					req.session['customer_number'] = req.POST['customer_number']
 					req.session['validation'] = "valid"
-					with open('uploads/wwbsearch.csv', 'wb+') as f:
+					with open('files/wwbsearch.csv', 'wb+') as f:
 						for chunk in uploadedFile.chunks():
 							f.write(chunk)
 					f.close()
@@ -113,11 +113,16 @@ def create_file(req):
 		return HttpResponse(status=204)
 
 def export(req):
-	print "Do we make it here?"
-	return redirect('/static/search/downloads/' + req.session['filename'])
+	export_path = os.path.join(settings.MEDIA_ROOT, req.session['filename'])
+	if os.path.exists(export_path):
+		with open(export_path, 'rb') as fh:
+			exportable = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+			exportable['Content-Disposition'] = 'inline; filename=' + os.path.basename(export_path)
+			return exportable
+	raise Http404
 
 def logout(req):
 	# TODO:
-	# Delete all .xlsx files from 'static/search/downloads'
+	# Delete all .xlsx files from 'downloads'
 	req.session.flush()
 	return redirect('/')
