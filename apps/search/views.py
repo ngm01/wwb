@@ -9,69 +9,77 @@ import csv, magic, os
 
 def index(req):
 	form = UploadFileForm()
-	# validation refers to file upload validation. This session variable
-	# is set in the "upload" route below.
-	# This doesn't work. (Of course not.) Damn.
+	# validation refers to file upload validation. 
+	# This session variable is set in the "upload" route below.
 	try:
-		print req.session['validation']
+		print "req.session['validation']:"+ req.session['validation']
 	except KeyError:
 		req.session['validation'] = ""
 
 	# Checks whether there is a customer number saved in session.
 	# This functions as a check whether a search has been executed or not.
-	# Buggy.
+	# Buggy. Refactor.
+	# Rather than check for customer number, check for "search complete"
 	if 'customer_number' not in req.session:
 		context = {'form': form,
 					'media_root': MEDIA_ROOT,
 					'validation': req.session['validation']}
-		print req.session['validation']
+		print "req.session['validation']:" + req.session['validation']
 
 		return render(req, 'search/index.html', context)
 	
 	else:
-		customer = Customer.objects.get(cust_number=req.session['customer_number'])
+		return redirect('/search/perform_search')
 		
-		data = []
-		req.session['count'] = 0;
 
-		# problems begin here without file type validation of user input...
-		# upload is written to 'wwbsearch.csv' in the 'uploads' directory
-		# this happens in the upload() function below.
-		# That is where we need to do validation.
-		with open('files/wwbsearch.csv', 'r') as f:
-			reader = csv.reader(f)
-			for row in reader:
-				if row[0] != '':
-					data.append({'item_number': row[0],
-						'title': row[1],
-						'isbn': row[9],
-						'match': ''})
+def perform_search(req):
+	customer = Customer.objects.get(cust_number=req.session['customer_number'])
+		
+	data = []
+	req.session['count'] = 0;
 
-		del data[0]
-		req.session['numberTitles'] = len(data)
-		for book in data:
-			book = searchCatalog(customer, book)
-			req.session['count'] += 1
+	with open('files/wwbsearch.csv', 'r') as f:
+		reader = csv.reader(f)
+		for row in reader:
+			if row[0] != '':
+				data.append({'item_number': row[0],
+					'title': row[1],
+					'isbn': row[9],
+					'match': ''})
 
-		#refactor 'results' and 'data' into a single variable
-		results = data
-		matches = 0
-		for result in results:
-			if result['match'] == "Possible Match":
-				matches += 1
+	del data[0]
+	req.session['numberTitles'] = len(data)
+	for book in data:
+		book = searchCatalog(customer, book)
+		req.session['count'] += 1
 
-		#is session the best way to store these results?
-		req.session['results'] = results
-		print req.session['validation']
-		context = {
-			'form': form,
-			'results' : results,
-			'urls' :[customer.url_begin, customer.url_end],
-			'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches],
-			'validation': req.session['validation']
-		}
+	#refactor 'results' and 'data' into a single variable
+	results = data
+	matches = 0
+	for result in results:
+		if result['match'] == "Possible Match":
+			matches += 1
 
-		return render(req, 'search/results.html', context)
+	#is session the best way to store these results?
+	req.session['results'] = results
+	req.session['matches'] = matches
+	print req.session['validation']
+
+	return redirect('/search/results')
+
+def display_results(req):
+	form = UploadFileForm()
+	customer = Customer.objects.get(cust_number=req.session['customer_number'])
+	results = req.session['results']
+	matches = req.session['matches']
+	context = {
+		'form': form,
+		'results' : results,
+		'urls' :[customer.url_begin, customer.url_end],
+		'search_data': [str(customer.cust_number) + customer.account_suffix, customer.cust_name, len(results), matches],
+		'validation': req.session['validation']
+	}
+	return render(req, 'search/results.html', context)
 
 def upload(req):
 	if req.method == 'POST':
